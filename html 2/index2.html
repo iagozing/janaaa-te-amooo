@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Best Friend Animation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
+
+  /* Fondo degradado animado */
+  body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    background: linear-gradient(270deg, #ff4d6d, #b366ff, #ff66b3, #b366ff);
+    background-size: 800% 800%;
+    animation: gradientShift 15s ease infinite;
+    color: #fff;
+  }
+
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .container {
+    text-align: center;
+    max-width: 800px;
+    padding: 0 20px;
+  }
+
+  #lyric {
+  font-size: 3rem;
+  opacity: 0;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 15px;
+  text-shadow:
+    2px 2px 4px rgba(0, 0, 0, 0.9),
+    0 0 10px #ff4d6d,
+    0 0 20px #ff6699;
+  max-width: 90vw;
+  word-wrap: break-word;
+}
+
+
+  #lyric.pulse {
+    animation: pulseGlow 1s ease infinite alternate;
+    color: #ff4d6d;
+    text-shadow:
+      0 0 15px #ff4d6d,
+      0 0 30px #ff6699,
+      0 0 45px #ff6699;
+    transform: scale(1.05);
+  }
+
+  @keyframes pulseGlow {
+    0% {
+      text-shadow:
+        0 0 10px #ff4d6d,
+        0 0 20px #ff4d6d,
+        0 0 30px #ff4d6d;
+      color: #ff4d6d;
+      transform: scale(1);
+    }
+    100% {
+      text-shadow:
+        0 0 20px #ff6699,
+        0 0 40px #ff6699,
+        0 0 60px #ff6699;
+      color: #ff6699;
+      transform: scale(1.1);
+    }
+  }
+
+  /* Estilos para el audio (barra y botones decorados) */
+  audio {
+    display: block;
+    margin: 40px auto 0;
+    outline: none;
+    width: 320px;
+    height: 45px;
+    background: #222;
+    border-radius: 25px;
+    box-shadow:
+      inset 0 0 8px #ff4d6d88,
+      0 4px 10px #ff4d6dcc;
+    filter: drop-shadow(0 0 10px #ff4d6d);
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  audio:hover {
+    background: #333;
+  }
+
+  audio::-webkit-media-controls-play-button,
+  audio::-webkit-media-controls-pause-button {
+    filter: drop-shadow(0 0 6px #ff4d6d);
+    border-radius: 50%;
+    background: #ff4d6d;
+    box-shadow: 0 0 10px #ff4d6d;
+    transition: background 0.3s ease;
+  }
+  audio::-webkit-media-controls-play-button:hover,
+  audio::-webkit-media-controls-pause-button:hover {
+    background: #ff6699;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div id="lyric"></div>
+    <audio id="audio" controls>
+      <source src="bestfriend-drop.mp3" type="audio/mpeg" />
+      Tu navegador no soporta audio.
+    </audio>
+  </div>
+
+  <script>
+    const lyricEl = document.getElementById('lyric');
+    const audio = document.getElementById('audio');
+
+    const lyrics = [
+      "Oh no no",
+      "Oh I still wanna be your favorite boy",
+      "I wanna be the one that makes your day",
+      "The one you think about as you lie awake",
+      "And I can't wait to be your number, your number one",
+      "I'll be your biggest fan and you'll be mine",
+      "But I still wanna break your heart and make you cry"
+    ];
+
+    // Tiempos acumulados para aparición de cada línea (en segundos)
+    const timings = [0, 3, 9, 13, 17, 23, 27];
+
+    let currentIndex = -1;
+
+    function showLine(index) {
+      lyricEl.style.opacity = 0;
+      lyricEl.classList.remove('pulse');
+
+      setTimeout(() => {
+        lyricEl.textContent = lyrics[index];
+        lyricEl.style.opacity = 1;
+        if(index === 1) {
+          lyricEl.classList.add('pulse');
+        }
+      }, 500);
+    }
+
+    function checkLyrics() {
+      const currentTime = audio.currentTime;
+      let nextIndex = timings.findIndex((t, i) => currentTime < t && i > 0) - 1;
+      if(nextIndex === -2) nextIndex = timings.length - 1; // última línea
+      if(nextIndex !== currentIndex && nextIndex >= 0) {
+        currentIndex = nextIndex;
+        showLine(currentIndex);
+      }
+      // Fade out lento desde 30s (desaparece en 3 segundos)
+      if(currentTime >= 30) {
+        let fade = Math.max(0, 1 - (currentTime - 30) / 3);
+        lyricEl.style.opacity = fade;
+      }
+    }
+
+    let intervalId;
+
+    audio.addEventListener('play', () => {
+      currentIndex = -1;
+      intervalId = setInterval(checkLyrics, 100);
+    });
+
+    audio.addEventListener('pause', () => {
+      clearInterval(intervalId);
+    });
+
+    audio.addEventListener('ended', () => {
+      clearInterval(intervalId);
+      lyricEl.style.opacity = 0;
+      lyricEl.classList.remove('pulse');
+    });
+  </script>
+</body>
+</html>
